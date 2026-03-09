@@ -18,6 +18,10 @@ declare const dssUrl: string;
 
 export let yasguiInstance: YASGUI | null = null;
 export let selectedEndpointData: EndpointData | null = null;
+/// Abort controller for ongoing autocompletion requests,
+/// so that all requests can be cancelled when the autocompleter
+/// is retriggered before the previous request(s) have completed.
+let autocompleterAbortController: AbortController | null = null;
 
 
 /* 
@@ -162,10 +166,12 @@ function preprocessTriplePattern(yasqe: YASQE, triplePattern: Triple) {
     };
 }
 
+
+const dssClient = new BasicDSSClient(dssUrl);
+
 function constructClient(queryContext: Triple[], ontologies: string[]) {
     const tripleStore = new ManualTripletStore();
     tripleStore.triplets = queryContext;
-    const dssClient = new BasicDSSClient(dssUrl);
     dssClient.ontologies = ontologies;
     const client = new DSSAutocompletionClient(tripleStore, dssClient);
     client.perRequestLimit = 600;
@@ -188,7 +194,12 @@ function suggestionComparator(token: AutocompletionToken) {
 export function setupYasqe(Yasqe: typeof YASQE) {
     const prop_completer: CompleterConfig = {
         name: "dasa_properties",
+        autoShow: true,
         get: async (yasqe, token?) => {
+            if (autocompleterAbortController) {
+                autocompleterAbortController.abort("New autocompletion request triggered");
+            }
+            autocompleterAbortController = new AbortController();
             const cursor = yasqe.getCursor();
             console.log(`Cursor position: line ${cursor.line}, ch ${cursor.ch}`);
 
@@ -207,8 +218,8 @@ export function setupYasqe(Yasqe: typeof YASQE) {
 
             const autocompletionClient = constructClient(processedTriples, [activeItem?.db_schema_name]);
 
-            const outgoingSuggestions = await autocompletionClient.suggestOutgoingProperties(currentTriple?.subject ?? "");
-            const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "");
+            const outgoingSuggestions = await autocompletionClient.suggestOutgoingProperties(currentTriple?.subject ?? "", autocompleterAbortController.signal);
+            const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "", autocompleterAbortController.signal);
             let suggestions = [...intersectSuggestions(outgoingSuggestions, incomingSuggestions)];
             if (suggestions.length === 0) {
                 suggestions = outgoingSuggestions.length < incomingSuggestions.length ? outgoingSuggestions : incomingSuggestions;
@@ -247,7 +258,12 @@ export function setupYasqe(Yasqe: typeof YASQE) {
 
     const class_completer: CompleterConfig = {
         name: "dasa_classes",
+        autoShow: true,
         get: async (yasqe, token?) => {
+            if (autocompleterAbortController) {
+                autocompleterAbortController.abort("New autocompletion request triggered");
+            }
+            autocompleterAbortController = new AbortController();
             const cursor = yasqe.getCursor();
             console.log(`Cursor position: line ${cursor.line}, ch ${cursor.ch}`);
 
@@ -270,7 +286,7 @@ export function setupYasqe(Yasqe: typeof YASQE) {
             const autocompletionClient = constructClient(processedTriples, [activeItem?.db_schema_name]);
 
 
-            let suggestions = await autocompletionClient.suggestClasses(currentTriple?.subject ?? "");
+            let suggestions = await autocompletionClient.suggestClasses(currentTriple?.subject ?? "", autocompleterAbortController.signal);
 
             if (token?.tokenPrefixUri !== undefined) {
                 const prefixUri = token.tokenPrefixUri;
@@ -310,8 +326,6 @@ export function setupYasqe(Yasqe: typeof YASQE) {
     autocompleterSet.delete("property");
     autocompleterSet.delete("class");
     Yasqe.defaults.autocompleters = Array.from(autocompleterSet);
-    Yasqe.defaults.autocompleters.unshift("dasa_properties", "dasa_classes");
-
 }
 console.log("YASQE setup module loaded");
 
@@ -347,7 +361,7 @@ function setupEndpointSelector(endpoints: EndpointData[], yasgui: YASGUI) {
     endpoints.forEach(endpoint => {
         const option = document.createElement("option");
         option.value = endpoint.sparql_url;
-        option.text = endpoint.display_name;
+        option.text = `${endpoint.display_name} (${endpoint.sparql_url})`;
         option.dataset.endpoint = JSON.stringify(endpoint);
         endpointSelect.appendChild(option);
     });
@@ -397,6 +411,7 @@ function initYasgui() {
         setupEndpointSelector(endpoints, yasgui);
 
         if (yasguiInstance !== null) {
+            autocompleterAbortController?.abort("YASGUI instance is being replaced");
             yasguiInstance.destroy();
         }
         yasguiInstance = yasgui;
