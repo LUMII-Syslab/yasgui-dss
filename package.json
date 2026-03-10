@@ -5,12 +5,11 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "dss-client": "link:../dss-client",
     "@triply/yasgui": "^4.2.28",
     "dotenv": "^17.3.1",
+    "dss-client": "link:../dss-client",
     "ejs": "^4.0.1",
-    "express": "^5.2.1",
-    "string-similarity-js": "^2.1.4"
+    "express": "^5.2.1"
   },
   "scripts": {
     "build": "npm run build:server && npm run build:client",

@@ -9,7 +9,6 @@ import { DSSAutocompletionClient, ManualTripletStore, BasicDSSClient, getEndpoin
 
 import { extractTriplePatternsFromQuery } from "./queryLexer.js";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
-import { stringSimilarity } from "string-similarity-js";
 
 type Triple = { subject: string, predicate: string, object: string };
 type EndpointData = { display_name: string, sparql_url: string, db_schema_name: string };
@@ -179,12 +178,47 @@ function constructClient(queryContext: Triple[], ontologies: string[]) {
 
 }
 
-function suggestionComparator(token: AutocompletionToken) {
+/**
+ * Tries to convert a full IRI to its short form using available prefixes.
+ * @param yasqe 
+ * @param iri 
+ * @returns Short form of the IRI if a matching prefix is found, otherwise null
+ */
+function tryIriToShortForm(yasqe: YASQE, iri: string) {
+    const queryPrefixes = yasqe.getPrefixesFromQuery();
+    const matchingPrefix = Object.keys(queryPrefixes).find(prefix => iri.startsWith(queryPrefixes[prefix]!));
+    if (matchingPrefix !== undefined) {
+        return matchingPrefix + ":" + iri.substring(queryPrefixes[matchingPrefix]!.length);
+    }
+    return null;
+}
+
+/**
+ * Checks if `sub` is a subsequence of `str`, meaning all characters of `sub` appear in `str` in the same order, but not necessarily contiguously.
+ * @param sub The potential subsequence to check
+ * @param str The string to check against
+ * @returns True if `sub` is a subsequence of `str`, false otherwise
+ */
+function isSubsequence(sub: string, str: string) {
+    let subIndex = 0;
+    for (let i = 0; i < str.length && subIndex < sub.length; i++) {
+        if (str[i] === sub[subIndex]) {
+            subIndex++;
+        }
+    }
+    return subIndex === sub.length;
+}
+
+function suggestionComparator(yasqe: YASQE, token: AutocompletionToken) {
     return (a: { value: string, count: number }, b: { value: string, count: number }) => {
-        // Sort by similarity first (descending - best matches first)
-        const similarityDiff = stringSimilarity(b.value, token?.autocompletionString ?? "") -
-            stringSimilarity(a.value, token?.autocompletionString ?? "");
-        if (Math.abs(similarityDiff) > 0.05) return similarityDiff;
+        // prioritize suggestions where token is a subsequence of the suggestion
+        const tokenString = token.autocompletionString || "";
+        const aShortForm = tryIriToShortForm(yasqe, a.value) || a.value;
+        const bShortForm = tryIriToShortForm(yasqe, b.value) || b.value;
+        const aIsSubsequence = isSubsequence(tokenString, a.value) || isSubsequence(tokenString, aShortForm);
+        const bIsSubsequence = isSubsequence(tokenString, b.value) || isSubsequence(tokenString, bShortForm);
+        if (aIsSubsequence && !bIsSubsequence) return -1;
+        if (!aIsSubsequence && bIsSubsequence) return 1;
         // Then by count as tiebreaker (descending - highest count first)
         return b.count - a.count;
     };
@@ -226,7 +260,7 @@ export function setupYasqe(Yasqe: typeof YASQE) {
             }
 
             if (token) {
-                suggestions = suggestions.sort(suggestionComparator(token));
+                suggestions = suggestions.sort(suggestionComparator(yasqe, token));
             }
 
             if (token?.tokenPrefixUri !== undefined) {
@@ -295,7 +329,7 @@ export function setupYasqe(Yasqe: typeof YASQE) {
             console.log(`Class suggestions: ${suggestions}`);
 
             if (token) {
-                suggestions = suggestions.sort(suggestionComparator(token));
+                suggestions = suggestions.sort(suggestionComparator(yasqe, token));
             }
 
             if (suggestions.length === 0) {

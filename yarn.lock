@@ -2186,11 +2186,6 @@ string-hash@~1.1.3:
   resolved "https://registry.yarnpkg.com/string-hash/-/string-hash-1.1.3.tgz#e8aafc0ac1855b4666929ed7dd1275df5d6c811b"
   integrity sha512-kJUvRUFK49aub+a7T1nNE66EJbZBMnBgoC1UbCZ5n6bsZKBRga4KgBRTMn/pFkeCZSYtNeSyMxPDM0AXWELk2A==
 
-string-similarity-js@^2.1.4:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/string-similarity-js/-/string-similarity-js-2.1.4.tgz#73716330691946f2ebc435859aba8327afd31307"
-  integrity sha512-uApODZNjCHGYROzDSAdCmAHf60L/pMDHnP/yk6TAbvGg7JSPZlSto/ceCI7hZEqzc53/juU2aOJFkM2yUVTMTA==
-
 string-width@^4.1.0, string-width@^4.2.0, string-width@^4.2.3:
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
