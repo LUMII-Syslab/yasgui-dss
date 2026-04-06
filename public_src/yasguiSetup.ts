@@ -256,7 +256,13 @@ export function setupYasqe(Yasqe: typeof YASQE) {
             const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "", autocompleterAbortController.signal);
             let suggestions = [...intersectSuggestions(outgoingSuggestions, incomingSuggestions)];
             if (suggestions.length === 0) {
-                suggestions = outgoingSuggestions.length < incomingSuggestions.length ? outgoingSuggestions : incomingSuggestions;
+                if (outgoingSuggestions.length === 0) {
+                    suggestions = incomingSuggestions;
+                } else if (incomingSuggestions.length === 0) {
+                    suggestions = outgoingSuggestions;
+                } else {
+                    suggestions = outgoingSuggestions.length < incomingSuggestions.length ? outgoingSuggestions : incomingSuggestions;
+                }
             }
 
             if (token) {
