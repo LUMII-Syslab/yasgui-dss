@@ -16,7 +16,6 @@
     "build:server": "tsc --project src",
     "build:client": "esbuild public_src/yasguiSetup.ts --bundle --outfile=public/scripts/yasguiSetup.js --sourcemap --format=esm",
     "start": "npm run build && node dist/index.js",
-    "dev": "npx concurrently \"tsc --project src --watch\" \"esbuild public_src/yasguiSetup.ts --bundle --outfile=public/scripts/yasguiSetup.js --sourcemap --watch\"",
     "start:watch": "npx concurrently \"tsc --project src --watch\" \"esbuild public_src/yasguiSetup.ts --bundle --outfile=public/scripts/yasguiSetup.js --sourcemap --watch\" \"nodemon --watch dist dist/index.js\""
   },
   "devDependencies": {

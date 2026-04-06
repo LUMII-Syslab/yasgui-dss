@@ -5,7 +5,7 @@
 import { type Token, type Yasqe as YASQE } from "@triply/yasqe";
 import _Yasgui, { Yasgui as YASGUI } from "@triply/yasgui";
 const Yasgui = _Yasgui as unknown as typeof YASGUI;
-import { DSSAutocompletionClient, ManualTripletStore, BasicDSSClient, getEndpoints, intersectSuggestions } from "dss-client";
+import { DSSAutocompletionClient, TripletStore, DSSClient, getEndpoints, intersectSuggestions } from "dss-client";
 
 import { extractTriplePatternsFromQuery } from "./queryLexer.js";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
@@ -166,10 +166,10 @@ function preprocessTriplePattern(yasqe: YASQE, triplePattern: Triple) {
 }
 
 
-const dssClient = new BasicDSSClient(dssUrl);
+const dssClient = new DSSClient(dssUrl);
 
 function constructClient(queryContext: Triple[], ontologies: string[]) {
-    const tripleStore = new ManualTripletStore();
+    const tripleStore = new TripletStore();
     tripleStore.triplets = queryContext;
     dssClient.ontologies = ontologies;
     const client = new DSSAutocompletionClient(tripleStore, dssClient);
