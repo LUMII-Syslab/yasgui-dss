@@ -7,7 +7,7 @@
   "dependencies": {
     "@triply/yasgui": "^4.2.28",
     "dotenv": "^17.3.1",
-    "dss-client": "link:../dss-client",
+    "dss-client": "https://github.com/LUMII-Syslab/dss-client#semver:~0.4.2",
     "ejs": "^4.0.1",
     "express": "^5.2.1"
   },
