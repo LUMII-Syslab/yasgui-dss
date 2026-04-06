@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
-        "composite": true
+        "composite": true,
+        "strict": true
     },
     "references": [
         {

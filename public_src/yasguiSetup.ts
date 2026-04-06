@@ -5,7 +5,7 @@
 import { type Token, type Yasqe as YASQE } from "@triply/yasqe";
 import _Yasgui, { Yasgui as YASGUI } from "@triply/yasgui";
 const Yasgui = _Yasgui as unknown as typeof YASGUI;
-import { DSSAutocompletionClient, TripletStore, DSSClient, getEndpoints, intersectSuggestions } from "dss-client";
+import { DSSAutocompletionClient, TripletStore, DSSClient, getEndpoints, intersectSuggestions, NamespaceData } from "dss-client";
 
 import { extractTriplePatternsFromQuery } from "./queryLexer.js";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
@@ -209,7 +209,7 @@ function isSubsequence(sub: string, str: string) {
     return subIndex === sub.length;
 }
 
-function suggestionComparator(yasqe: YASQE, token: AutocompletionToken) {
+function suggestionComparator(yasqe: YASQE, token: AutocompletionToken, namespaceData: NamespaceData[]) {
     return (a: { value: string, count: number }, b: { value: string, count: number }) => {
         // prioritize suggestions where token is a subsequence of the suggestion
         const tokenString = token.autocompletionString || "";
@@ -219,6 +219,13 @@ function suggestionComparator(yasqe: YASQE, token: AutocompletionToken) {
         const bIsSubsequence = isSubsequence(tokenString, b.value) || isSubsequence(tokenString, bShortForm);
         if (aIsSubsequence && !bIsSubsequence) return -1;
         if (!aIsSubsequence && bIsSubsequence) return 1;
+        // Then prioritize namespaces where basic order sequence is lower (higher relevance)
+        const priorityA = namespaceData.find(v => a.value.startsWith(v.value))?.basic_order_level ?? Number.POSITIVE_INFINITY;
+        const priorityB = namespaceData.find(v => b.value.startsWith(v.value))?.basic_order_level ?? Number.POSITIVE_INFINITY;
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+
         // Then by count as tiebreaker (descending - highest count first)
         return b.count - a.count;
     };
@@ -265,8 +272,10 @@ export function setupYasqe(Yasqe: typeof YASQE) {
                 }
             }
 
+            const namespaceData = await autocompletionClient.dssClient.getNamespaces();
+
             if (token) {
-                suggestions = suggestions.sort(suggestionComparator(yasqe, token));
+                suggestions = suggestions.sort(suggestionComparator(yasqe, token, namespaceData));
             }
 
             if (token?.tokenPrefixUri !== undefined) {
@@ -334,8 +343,10 @@ export function setupYasqe(Yasqe: typeof YASQE) {
             }
             console.log(`Class suggestions: ${suggestions}`);
 
+            const namespaceData = await autocompletionClient.dssClient.getNamespaces();
+
             if (token) {
-                suggestions = suggestions.sort(suggestionComparator(yasqe, token));
+                suggestions = suggestions.sort(suggestionComparator(yasqe, token, namespaceData));
             }
 
             if (suggestions.length === 0) {
