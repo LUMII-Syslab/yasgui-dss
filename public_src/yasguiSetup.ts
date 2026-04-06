@@ -168,10 +168,10 @@ function preprocessTriplePattern(yasqe: YASQE, triplePattern: Triple) {
 
 const dssClient = new DSSClient(dssUrl);
 
-function constructClient(queryContext: Triple[], ontologies: string[]) {
+function constructClient(queryContext: Triple[], ontologies: string) {
     const tripleStore = new TripletStore();
     tripleStore.triplets = queryContext;
-    dssClient.ontologies = ontologies;
+    dssClient.ontology = ontologies;
     const client = new DSSAutocompletionClient(tripleStore, dssClient);
     client.perRequestLimit = 600;
     return client;
@@ -250,7 +250,7 @@ export function setupYasqe(Yasqe: typeof YASQE) {
             }
             console.log(`Current endpoint: ${activeItem?.display_name}`);
 
-            const autocompletionClient = constructClient(processedTriples, [activeItem?.db_schema_name]);
+            const autocompletionClient = constructClient(processedTriples, activeItem?.db_schema_name);
 
             const outgoingSuggestions = await autocompletionClient.suggestOutgoingProperties(currentTriple?.subject ?? "", autocompleterAbortController.signal);
             const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "", autocompleterAbortController.signal);
@@ -317,7 +317,7 @@ export function setupYasqe(Yasqe: typeof YASQE) {
 
             console.log(`Current endpoint: ${activeItem?.db_schema_name}`);
 
-            const autocompletionClient = constructClient(processedTriples, [activeItem?.db_schema_name]);
+            const autocompletionClient = constructClient(processedTriples, activeItem?.db_schema_name);
 
 
             let suggestions = await autocompletionClient.suggestClasses(currentTriple?.subject ?? "", autocompleterAbortController.signal);
