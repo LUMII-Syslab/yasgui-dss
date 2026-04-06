@@ -5,7 +5,7 @@
 import { type Token, type Yasqe as YASQE } from "@triply/yasqe";
 import _Yasgui, { Yasgui as YASGUI } from "@triply/yasgui";
 const Yasgui = _Yasgui as unknown as typeof YASGUI;
-import { DSSAutocompletionClient, TripletStore, DSSClient, getEndpoints, intersectSuggestions, NamespaceData } from "dss-client";
+import { DSSAutocompletionClient, TripletStore, DSSClient, getEndpoints, intersectSuggestions, NamespaceData, PropertyData } from "dss-client";
 
 import { extractTriplePatternsFromQuery } from "./queryLexer.js";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
@@ -21,6 +21,16 @@ export let selectedEndpointData: EndpointData | null = null;
 /// so that all requests can be cancelled when the autocompleter
 /// is retriggered before the previous request(s) have completed.
 let autocompleterAbortController: AbortController | null = null;
+type AutocompletionData = {
+    propertydata: { [IRIs: string]: PropertyData },
+    tokenMap: { [tokens: string]: PropertyData | null },
+};
+let autocompletionData: AutocompletionData = {
+    propertydata: {},
+    tokenMap: {},
+
+};
+
 
 
 /* 
@@ -288,6 +298,15 @@ export function setupYasqe(Yasqe: typeof YASQE) {
                 const genericSuggestions = await Yasqe.Autocompleters["property"]?.get(yasqe, token);
                 return genericSuggestions || [];
             }
+
+            autocompletionData = {
+                propertydata: suggestions.reduce((acc, suggestion) => {
+                    acc[suggestion.value] = suggestion;
+                    return acc;
+                }, {} as AutocompletionData["propertydata"]),
+                tokenMap: {},
+            }
+
             const suggestion_values = suggestions.map(s => s.value);
             return suggestion_values;
         },
@@ -301,7 +320,44 @@ export function setupYasqe(Yasqe: typeof YASQE) {
             return preprocessIriForCompletion(yasqe, token);
         },
         postProcessSuggestion(yasqe, token, suggestedString) {
-            return postprocessIriCompletion(yasqe, token, suggestedString);
+            const completedString = postprocessIriCompletion(yasqe, token, suggestedString);
+            autocompletionData.tokenMap[completedString] = autocompletionData.propertydata[suggestedString] ?? null;
+            return completedString;
+        },
+        postprocessHints(yasqe, hints) {
+            for (const hint of hints) {
+                const completedString = hint.text;
+                const propertyData = autocompletionData.tokenMap[completedString];
+                if (propertyData) {
+                    const prefixFormText = `${propertyData.prefix}:${propertyData.local_name}`;
+                    const withDisplay = propertyData.local_name == propertyData.display_name ? `${prefixFormText}` : `${prefixFormText} (${propertyData.display_name})`;
+                    const withIri = `${withDisplay}\t<${propertyData.value}>`;
+                    hint.displayText = withIri;
+                    hint.render = (el, self, data) => {
+                        el.style.display = "flex";
+                        el.style.alignItems = "center";
+                        el.style.width = "100%";
+
+                        const displaySpan = document.createElement("span");
+                        displaySpan.textContent = withDisplay;
+                        el.appendChild(displaySpan);
+
+                        const iriSpan = document.createElement("span");
+                        iriSpan.textContent = `<${propertyData.value}>`;
+                        iriSpan.classList.add("iri");
+                        iriSpan.style.marginLeft = "auto";
+                        iriSpan.style.textAlign = "right";
+                        iriSpan.style.whiteSpace = "nowrap";
+                        el.appendChild(iriSpan);
+
+                        displaySpan.style.overflow = "hidden";
+                        displaySpan.style.textOverflow = "ellipsis";
+                        displaySpan.style.whiteSpace = "nowrap";
+
+                    };
+                }
+            }
+            return hints;
         },
     }
 
@@ -372,8 +428,6 @@ export function setupYasqe(Yasqe: typeof YASQE) {
     Yasqe.registerAutocompleter(prop_completer, true);
     Yasqe.registerAutocompleter(class_completer, true);
     const autocompleterSet = new Set(Yasqe.defaults.autocompleters);
-    // autocompleterSet.add("dasa_properties");
-    // autocompleterSet.add("dasa_classes");
     autocompleterSet.delete("property");
     autocompleterSet.delete("class");
     Yasqe.defaults.autocompleters = Array.from(autocompleterSet);
