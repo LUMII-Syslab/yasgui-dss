@@ -340,19 +340,14 @@ export function setupYasqe(Yasqe: typeof YASQE) {
 
                         const displaySpan = document.createElement("span");
                         displaySpan.textContent = withDisplay;
+                        displaySpan.classList.add("iri-short");
                         el.appendChild(displaySpan);
 
                         const iriSpan = document.createElement("span");
                         iriSpan.textContent = `<${propertyData.value}>`;
                         iriSpan.classList.add("iri");
-                        iriSpan.style.marginLeft = "auto";
-                        iriSpan.style.textAlign = "right";
-                        iriSpan.style.whiteSpace = "nowrap";
                         el.appendChild(iriSpan);
 
-                        displaySpan.style.overflow = "hidden";
-                        displaySpan.style.textOverflow = "ellipsis";
-                        displaySpan.style.whiteSpace = "nowrap";
 
                     };
                 }
