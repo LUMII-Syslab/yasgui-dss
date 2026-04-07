@@ -288,11 +288,6 @@ export function setupYasqe(Yasqe: typeof YASQE) {
                 suggestions = suggestions.sort(suggestionComparator(yasqe, token, namespaceData));
             }
 
-            if (token?.tokenPrefixUri !== undefined) {
-                const prefixUri = token.tokenPrefixUri;
-                return suggestions.filter(s => s.value.startsWith(prefixUri)).map(s => s.value);
-            }
-
             if (suggestions.length === 0) {
                 console.log("Falling back to generic property suggestions");
                 const genericSuggestions = await Yasqe.Autocompleters["property"]?.get(yasqe, token);
