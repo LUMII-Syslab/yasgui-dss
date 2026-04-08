@@ -973,9 +973,9 @@ dotenv@^17.3.1:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-17.4.1.tgz#d8e2179fe287365ef3aecb9459668454168eda88"
   integrity sha512-k8DaKGP6r1G30Lx8V4+pCsLzKr8vLmV2paqEj1Y55GdAgJuIqpRp5FfajGF8KtwMxCz9qJc6wUIJnm053d/WCw==
 
-"dss-client@github:LUMII-Syslab/dss-client#semver:~0.5.1":
-  version "0.5.1"
-  resolved "git+ssh://git@github.com/LUMII-Syslab/dss-client.git#3fa2909c173349d789227f7acf2afc8270056c95"
+"dss-client@github:LUMII-Syslab/dss-client#semver:~0.6.0":
+  version "0.6.0"
+  resolved "git+ssh://git@github.com/LUMII-Syslab/dss-client.git#ffb013bdcefed583a8893cc1426ac8f5a99c8714"
 
 dunder-proto@^1.0.1:
   version "1.0.1"

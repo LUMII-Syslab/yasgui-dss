@@ -324,8 +324,8 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
                 const completedString = hint.text;
                 const propertyData = autocompletionData.tokenMap[completedString];
                 if (propertyData) {
-                    const prefixFormText = `${propertyData.prefix}:${propertyData.local_name}`;
-                    const withDisplay = propertyData.local_name == propertyData.display_name ? `${prefixFormText}` : `${prefixFormText} (${propertyData.display_name})`;
+                    const prefixFormText = `${propertyData.prefix}:${propertyData.localName}`;
+                    const withDisplay = propertyData.localName == propertyData.displayName ? `${prefixFormText}` : `${prefixFormText} (${propertyData.displayName})`;
                     const withIri = `${withDisplay}\t<${propertyData.value}>`;
                     hint.displayText = withIri;
                     hint.render = (el) => {
