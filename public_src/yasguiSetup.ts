@@ -166,6 +166,7 @@ function preprocessIri(yasqe: YASQE, iri: string) {
         return iri.substring(1, iri.length - 1);
     }
 }
+/* ----- End of copied functions ----- */
 
 function preprocessTriplePattern(yasqe: YASQE, triplePattern: Triple) {
     return {
@@ -319,7 +320,7 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
             autocompletionData.tokenMap[completedString] = autocompletionData.propertydata[suggestedString] ?? null;
             return completedString;
         },
-        postprocessHints(yasqe, hints) {
+        postprocessHints(_yasqe, hints) {
             for (const hint of hints) {
                 const completedString = hint.text;
                 const propertyData = autocompletionData.tokenMap[completedString];
@@ -457,14 +458,14 @@ function setupEndpointSelector(endpoints: EndpointData[], yasgui: YASGUI) {
         const option = document.createElement("option");
         option.value = endpoint.sparqlUrl;
         option.text = `${endpoint.displayName} (${endpoint.sparqlUrl})`;
-        option.dataset.endpoint = JSON.stringify(endpoint);
+        option.dataset["endpoint"] = JSON.stringify(endpoint);
         endpointSelect.appendChild(option);
     });
 
     endpointSelect.addEventListener("change", () => {
         const selectedEndpoint =
             endpointSelect.options[endpointSelect.selectedIndex];
-        const endpointData = JSON.parse(selectedEndpoint?.dataset.endpoint ?? "null");
+        const endpointData = JSON.parse(selectedEndpoint?.dataset["endpoint"] ?? "null");
         if (!verifyEndpointData(endpointData)) {
             console.error("Selected endpoint data is invalid:", endpointData);
             return;
