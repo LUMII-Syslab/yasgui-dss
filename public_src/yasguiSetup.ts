@@ -3,15 +3,15 @@
 
 // import Yasqe from "@triply/yasqe";
 import { type Token, type Yasqe as YASQE } from "@triply/yasqe";
-import _Yasgui, { Yasgui as YASGUI } from "@triply/yasgui";
-const Yasgui = _Yasgui as unknown as typeof YASGUI;
+import yasguiModule, { Yasgui as YASGUI } from "@triply/yasgui";
+const Yasgui = yasguiModule as unknown as typeof YASGUI;
 import { DSSAutocompletionClient, TripletStore, DSSClient, getEndpoints, intersectSuggestions, NamespaceData, PropertyData } from "dss-client";
 
 import { extractTriplePatternsFromQuery } from "./queryLexer.js";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
 
 type Triple = { subject: string, predicate: string, object: string };
-type EndpointData = { display_name: string, sparql_url: string, db_schema_name: string };
+type EndpointData = { displayName: string, sparqlUrl: string, dbSchemaName: string };
 
 declare const dssUrl: string;
 
@@ -242,8 +242,8 @@ function suggestionComparator(yasqe: YASQE, token: AutocompletionToken, namespac
 }
 
 
-export function setupYasqe(Yasqe: typeof YASQE) {
-    const prop_completer: CompleterConfig = {
+export function setupYasqe(yasqeClass: typeof YASQE) {
+    const propertyCompleter: CompleterConfig = {
         name: "dasa_properties",
         autoShow: true,
         get: async (yasqe, token?) => {
@@ -265,9 +265,9 @@ export function setupYasqe(Yasqe: typeof YASQE) {
                 console.error("No active endpoint selected for autocompletion.");
                 return [];
             }
-            console.log(`Current endpoint: ${activeItem?.display_name}`);
+            console.log(`Current endpoint: ${activeItem?.displayName}`);
 
-            const autocompletionClient = constructClient(processedTriples, activeItem?.db_schema_name);
+            const autocompletionClient = constructClient(processedTriples, activeItem?.dbSchemaName);
 
             const outgoingSuggestions = await autocompletionClient.suggestOutgoingProperties(currentTriple?.subject ?? "", autocompleterAbortController.signal);
             const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "", autocompleterAbortController.signal);
@@ -290,7 +290,7 @@ export function setupYasqe(Yasqe: typeof YASQE) {
 
             if (suggestions.length === 0) {
                 console.log("Falling back to generic property suggestions");
-                const genericSuggestions = await Yasqe.Autocompleters["property"]?.get(yasqe, token);
+                const genericSuggestions = await yasqeClass.Autocompleters["property"]?.get(yasqe, token);
                 return genericSuggestions || [];
             }
 
@@ -302,14 +302,14 @@ export function setupYasqe(Yasqe: typeof YASQE) {
                 tokenMap: {},
             }
 
-            const suggestion_values = suggestions.map(s => s.value);
-            return suggestion_values;
+            const suggestionValues = suggestions.map(s => s.value);
+            return suggestionValues;
         },
         bulk: false,
         isValidCompletionPosition: (_yasqe) => {
             const yasqe = _yasqe as CodeMirror.Editor & YASQE;
 
-            return Yasqe.Autocompleters["property"]?.isValidCompletionPosition(yasqe) ?? false;
+            return yasqeClass.Autocompleters["property"]?.isValidCompletionPosition(yasqe) ?? false;
         },
         preProcessToken(yasqe, token) {
             return preprocessIriForCompletion(yasqe, token);
@@ -328,7 +328,7 @@ export function setupYasqe(Yasqe: typeof YASQE) {
                     const withDisplay = propertyData.local_name == propertyData.display_name ? `${prefixFormText}` : `${prefixFormText} (${propertyData.display_name})`;
                     const withIri = `${withDisplay}\t<${propertyData.value}>`;
                     hint.displayText = withIri;
-                    hint.render = (el, self, data) => {
+                    hint.render = (el) => {
                         el.style.display = "flex";
                         el.style.alignItems = "center";
                         el.style.width = "100%";
@@ -351,7 +351,7 @@ export function setupYasqe(Yasqe: typeof YASQE) {
         },
     }
 
-    const class_completer: CompleterConfig = {
+    const classCompleter: CompleterConfig = {
         name: "dasa_classes",
         autoShow: true,
         get: async (yasqe, token?) => {
@@ -376,9 +376,9 @@ export function setupYasqe(Yasqe: typeof YASQE) {
                 return [];
             }
 
-            console.log(`Current endpoint: ${activeItem?.db_schema_name}`);
+            console.log(`Current endpoint: ${activeItem?.dbSchemaName}`);
 
-            const autocompletionClient = constructClient(processedTriples, activeItem?.db_schema_name);
+            const autocompletionClient = constructClient(processedTriples, activeItem?.dbSchemaName);
 
 
             let suggestions = await autocompletionClient.suggestClasses(currentTriple?.subject ?? "", autocompleterAbortController.signal);
@@ -398,14 +398,14 @@ export function setupYasqe(Yasqe: typeof YASQE) {
             if (suggestions.length === 0) {
                 // If no suggestions are returned, fall back to generic class suggestions
                 console.log("Falling back to generic class suggestions");
-                const genericSuggestions = await Yasqe.Autocompleters["class"]?.get(yasqe, token);
+                const genericSuggestions = await yasqeClass.Autocompleters["class"]?.get(yasqe, token);
                 return genericSuggestions || [];
             }
             return suggestions.map(s => s.value);
         },
         bulk: false,
         isValidCompletionPosition: (yasqe) => {
-            return Yasqe.Autocompleters["class"]?.isValidCompletionPosition(yasqe) ?? false;
+            return yasqeClass.Autocompleters["class"]?.isValidCompletionPosition(yasqe) ?? false;
         },
         preProcessToken(yasqe, token) {
             return preprocessIriForCompletion(yasqe, token);
@@ -415,12 +415,12 @@ export function setupYasqe(Yasqe: typeof YASQE) {
         }
 
     };
-    Yasqe.registerAutocompleter(prop_completer, true);
-    Yasqe.registerAutocompleter(class_completer, true);
-    const autocompleterSet = new Set(Yasqe.defaults.autocompleters);
+    yasqeClass.registerAutocompleter(propertyCompleter, true);
+    yasqeClass.registerAutocompleter(classCompleter, true);
+    const autocompleterSet = new Set(yasqeClass.defaults.autocompleters);
     autocompleterSet.delete("property");
     autocompleterSet.delete("class");
-    Yasqe.defaults.autocompleters = Array.from(autocompleterSet);
+    yasqeClass.defaults.autocompleters = Array.from(autocompleterSet);
 }
 console.log("YASQE setup module loaded");
 
@@ -442,8 +442,8 @@ function selectEndpoint(endpointData: EndpointData, yasgui: YASGUI) {
         return;
     }
 
-    activeTab.setEndpoint(endpointData.sparql_url);
-    console.log(`Endpoint changed to ${endpointData.sparql_url}`);
+    activeTab.setEndpoint(endpointData.sparqlUrl);
+    console.log(`Endpoint changed to ${endpointData.sparqlUrl}`);
 
     selectedEndpointData = endpointData;
 }
@@ -455,8 +455,8 @@ function setupEndpointSelector(endpoints: EndpointData[], yasgui: YASGUI) {
     endpointSelect.innerHTML = "";
     endpoints.forEach(endpoint => {
         const option = document.createElement("option");
-        option.value = endpoint.sparql_url;
-        option.text = `${endpoint.display_name} (${endpoint.sparql_url})`;
+        option.value = endpoint.sparqlUrl;
+        option.text = `${endpoint.displayName} (${endpoint.sparqlUrl})`;
         option.dataset.endpoint = JSON.stringify(endpoint);
         endpointSelect.appendChild(option);
     });
@@ -486,20 +486,25 @@ function initYasgui() {
     const abortController = new AbortController();
 
     const yasgui = (async () => {
-        const endpoints = await getEndpoints(dssUrl, abortController.signal);
+        const endpointsData = await getEndpoints(dssUrl, abortController.signal);
+        const endpoints: EndpointData[] = endpointsData.map(endpoint => ({
+            dbSchemaName: endpoint.db_schema_name,
+            displayName: endpoint.display_name,
+            sparqlUrl: endpoint.sparql_url,
+        }));
         console.log("Fetched endpoints:", endpoints);
 
         const yasgui: YASGUI = new Yasgui(
             document.getElementById("yasgui")!, {
             endpointCatalogueOptions: {
                 getData: () => endpoints.map(endpoint => ({
-                    endpoint: endpoint.sparql_url,
+                    endpoint: endpoint.sparqlUrl,
                     internal: endpoint
                 })),
                 keys: [],
                 renderItem: (data, source) => {
                     const endpointData = data.value as { endpoint: string, internal: EndpointData };
-                    source.innerHTML = endpointData.internal.display_name;
+                    source.innerHTML = endpointData.internal.displayName;
                 },
             },
         });
