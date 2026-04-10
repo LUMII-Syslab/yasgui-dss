@@ -362,7 +362,7 @@
     "@types/connect" "*"
     "@types/node" "*"
 
-"@types/codemirror@^5.60.17":
+"@types/codemirror@^5":
   version "5.60.17"
   resolved "https://registry.yarnpkg.com/@types/codemirror/-/codemirror-5.60.17.tgz#754649d285e0e775fe912ad2f5e757f22a70e1cf"
   integrity sha512-AZq2FIsUHVMlp7VSe2hTfl5w4pcUkoFkM3zVsRKsn1ca8CXRDYvnin04+HP2REkwsxemuHqvDofdlhUWNpbwfw==

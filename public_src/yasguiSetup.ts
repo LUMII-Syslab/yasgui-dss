@@ -2,13 +2,22 @@
 
 
 // import Yasqe from "@triply/yasqe";
-import { type Token, type Yasqe as YASQE } from "@triply/yasqe";
+import { Hint, HintList, type Token, type Yasqe as YASQE } from "@triply/yasqe";
 import yasguiModule, { Yasgui as YASGUI } from "@triply/yasgui";
 const Yasgui = yasguiModule as unknown as typeof YASGUI;
 import { DSSAutocompletionClient, TripletStore, DSSClient, getEndpoints, intersectSuggestions, NamespaceData, PropertyData } from "dss-client";
 
 import { extractTriplePatternsFromQuery } from "./queryLexer.js";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
+
+declare module "codemirror" {
+    export interface Completion {
+        hint?: (cm: CodeMirror.Editor, data?: HintList, completion?: Hint) => void;
+    }
+}
+
+import type { Completion } from "codemirror";
+
 
 type Triple = { subject: string, predicate: string, object: string };
 type EndpointData = { displayName: string, sparqlUrl: string, dbSchemaName: string };
@@ -127,17 +136,14 @@ export function postprocessIriCompletion(_yasqe: YASQE, token: AutocompletionTok
 
     // If the token is prefixable, convert the suggested string to prefixed form
     const prefixes = _yasqe.getPrefixesFromQuery();
-    const matchingPrefix = Object.keys(prefixes).find(prefix => suggestedString.startsWith(prefixes[prefix]!));
-    if (matchingPrefix !== undefined) {
-        const prefixedSuggestedString = matchingPrefix + ":" + suggestedString.substring(prefixes[matchingPrefix]!.length);
-        return prefixedSuggestedString;
-    }
 
-
-    if (token.tokenPrefix && token.autocompletionString && token.tokenPrefixUri) {
-        suggestedString = token.tokenPrefix + suggestedString.substring(token.tokenPrefixUri.length);
-    } else {
-        suggestedString = "<" + suggestedString + ">";
+    const prefixesEntries = Object.entries(prefixes);
+    const matchingPrefixEntry = prefixesEntries.filter(([, uri]) => suggestedString.startsWith(uri));
+    // Find the longest matching prefix to ensure the most specific prefix is used
+    const sortedMatchingPrefixEntries = matchingPrefixEntry.sort((a, b) => b[1].length - a[1].length);
+    if (sortedMatchingPrefixEntries.length > 0 && sortedMatchingPrefixEntries[0]) {
+        const [matchingPrefix, matchingUri] = sortedMatchingPrefixEntries[0];
+        suggestedString = matchingPrefix + ":" + suggestedString.substring(matchingUri.length);
     }
     return suggestedString;
 }
@@ -321,7 +327,22 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
             return completedString;
         },
         postprocessHints(_yasqe, hints) {
-            for (const hint of hints) {
+            const hintsWithCompletionCallback = hints as (Hint & Completion)[];
+            for (const hint of hintsWithCompletionCallback) {
+                hint.hint = (cm, data, hint) => {
+                    console.log("Completion callback triggered with hint:", hint, "and data:", data);
+                    const cursor = cm.getCursor();
+                    if (!hint) {
+                        console.error("No hint provided for completion callback");
+                    }
+                    function getText(completion: Hint | string) {
+                        if (typeof completion == "string") return completion;
+                        else return completion.text;
+                    }
+                    cm.replaceRange(getText(hint ?? ""), hint?.from ?? data?.from ?? cursor,
+                        hint?.to ?? data?.to ?? cursor, "complete");
+                };
+
                 const completedString = hint.text;
                 const propertyData = autocompletionData.tokenMap[completedString];
                 if (propertyData) {
@@ -329,7 +350,7 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
                     const withDisplay = propertyData.localName == propertyData.displayName ? `${prefixFormText}` : `${prefixFormText} (${propertyData.displayName})`;
                     const withIri = `${withDisplay}\t<${propertyData.value}>`;
                     hint.displayText = withIri;
-                    hint.render = (el) => {
+                    hint.render = (el, ...args) => {
                         el.style.display = "flex";
                         el.style.alignItems = "center";
                         el.style.width = "100%";
