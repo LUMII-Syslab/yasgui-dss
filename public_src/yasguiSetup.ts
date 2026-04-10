@@ -16,7 +16,11 @@ declare module "codemirror" {
     }
 }
 
-import type { Completion } from "codemirror";
+import type { Completion, Editor } from "codemirror";
+
+// CodeMirror is a class and a module simultaneously, so ignore the naming convention warning
+// eslint-disable-next-line @typescript-eslint/naming-convention
+import CodeMirror from "codemirror";
 
 
 type Triple = { subject: string, predicate: string, object: string };
@@ -33,11 +37,12 @@ let autocompleterAbortController: AbortController | null = null;
 type AutocompletionData = {
     propertydata: { [IRIs: string]: PropertyData },
     tokenMap: { [tokens: string]: PropertyData | null },
+    namespaceData?: NamespaceData[],
 };
 let autocompletionData: AutocompletionData = {
     propertydata: {},
     tokenMap: {},
-
+    namespaceData: [],
 };
 
 
@@ -131,19 +136,20 @@ export function preprocessIriForCompletion(yasqe: YASQE, token: Token) {
     return processedToken;
 }
 
-export function postprocessIriCompletion(_yasqe: YASQE, token: AutocompletionToken, suggestedString: string) {
+export function postprocessIriCompletion(_yasqe: YASQE, _: AutocompletionToken, suggestedString: string, namespaces: NamespaceData[] = []) {
     // console.log(`Token to complete: ${JSON.stringify(token)}, suggested string: ${suggestedString}`);
 
     // If the token is prefixable, convert the suggested string to prefixed form
-    const prefixes = _yasqe.getPrefixesFromQuery();
+    const prefixes = namespaces.map(ns => ([ns.name, ns.value] as [string, string]));
 
-    const prefixesEntries = Object.entries(prefixes);
-    const matchingPrefixEntry = prefixesEntries.filter(([, uri]) => suggestedString.startsWith(uri));
+    const matchingPrefixEntry = prefixes.filter(([, uri]) => suggestedString.startsWith(uri));
     // Find the longest matching prefix to ensure the most specific prefix is used
     const sortedMatchingPrefixEntries = matchingPrefixEntry.sort((a, b) => b[1].length - a[1].length);
     if (sortedMatchingPrefixEntries.length > 0 && sortedMatchingPrefixEntries[0]) {
         const [matchingPrefix, matchingUri] = sortedMatchingPrefixEntries[0];
         suggestedString = matchingPrefix + ":" + suggestedString.substring(matchingUri.length);
+    } else {
+        suggestedString = `<${suggestedString}>`;
     }
     return suggestedString;
 }
@@ -173,6 +179,17 @@ function preprocessIri(yasqe: YASQE, iri: string) {
     }
 }
 /* ----- End of copied functions ----- */
+
+
+function addPrefix(cm: Editor, prefixName: string, uri: string) {
+    // Find first prefix
+    const firstPrefixRegex = /^PREFIX\s+\w*:\s*<[^>]*>\s*$/im;
+    const firstPrefixMatch = cm.getValue().match(firstPrefixRegex);
+    const position = cm.posFromIndex(firstPrefixMatch?.index ?? 0);
+
+    cm.replaceRange(`PREFIX ${prefixName}: <${uri}>\n`, position);
+}
+
 
 function preprocessTriplePattern(yasqe: YASQE, triplePattern: Triple) {
     return {
@@ -307,6 +324,7 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
                     return acc;
                 }, {} as AutocompletionData["propertydata"]),
                 tokenMap: {},
+                namespaceData: await autocompletionClient.dssClient.getNamespaces(),
             }
 
             const suggestionValues = suggestions.map(s => s.value);
@@ -322,7 +340,7 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
             return preprocessIriForCompletion(yasqe, token);
         },
         postProcessSuggestion(yasqe, token, suggestedString) {
-            const completedString = postprocessIriCompletion(yasqe, token, suggestedString);
+            const completedString = postprocessIriCompletion(yasqe, token, suggestedString, autocompletionData.namespaceData);
             autocompletionData.tokenMap[completedString] = autocompletionData.propertydata[suggestedString] ?? null;
             return completedString;
         },
@@ -341,6 +359,20 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
                     }
                     cm.replaceRange(getText(hint ?? ""), hint?.from ?? data?.from ?? cursor,
                         hint?.to ?? data?.to ?? cursor, "complete");
+                    if (!hint) {
+                        return;
+                    }
+                    const prefixes = _yasqe.getPrefixesFromQuery();
+                    // If the completion's prefix isn't in query prefixes, add it
+                    const prefix = Object.entries(prefixes).find(([prefix,]) => hint.text.startsWith(prefix));
+                    if (!prefix) {
+                        const dssPrefixes = autocompletionData.namespaceData?.map(ns => ([ns.name, ns.value] as [string, string])) ?? [];
+                        const matchingDssPrefix = dssPrefixes.find(([prefix,]) => hint.text.startsWith(`${prefix}:`));
+
+                        if (matchingDssPrefix) {
+                            addPrefix(cm, matchingDssPrefix[0], matchingDssPrefix[1]);
+                        }
+                    }
                 };
 
                 const completedString = hint.text;
@@ -350,7 +382,7 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
                     const withDisplay = propertyData.localName == propertyData.displayName ? `${prefixFormText}` : `${prefixFormText} (${propertyData.displayName})`;
                     const withIri = `${withDisplay}\t<${propertyData.value}>`;
                     hint.displayText = withIri;
-                    hint.render = (el, ...args) => {
+                    hint.render = (el) => {
                         el.style.display = "flex";
                         el.style.alignItems = "center";
                         el.style.width = "100%";
