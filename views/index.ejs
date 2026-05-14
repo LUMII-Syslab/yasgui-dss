@@ -24,12 +24,27 @@
             white-space: nowrap;
         }
 
+        .iri-short .highlighted {
+            font-weight: bold;
+        }
+
+
+
         li .iri {
             color: gray;
         }
 
+        li .iri .highlighted {
+            color: rgb(74, 74, 74);
+            font-weight: bold;
+        }
+
         li.CodeMirror-hint-active .iri {
             color: white;
+        }
+
+        li.CodeMirror-hint-active .iri .highlighted {
+            color: rgb(196, 196, 196);
         }
 
     </style>
@@ -40,6 +55,13 @@
         <label for="endpoint_select">Select SPARQL Endpoint:</label>
         <select id="endpoint_select">
             <option value="Loading..." disabled selected id="endpoint_loading">Loading...</option>
+        </select>
+    </div>
+    <div id="suggestion_choice">
+        <label for="suggestion_select">Select Suggestion Engine:</label>
+        <select id="suggestion_select">
+            <option value="dasa" selected>DSS Assisted SPARQL Autocompletion</option>
+            <option value="builtin">YASQE built-in</option>
         </select>
     </div>
     <div id="yasgui"></div>
