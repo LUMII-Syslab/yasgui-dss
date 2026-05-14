@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "es2020",
-        "module": "nodenext",
+        "module": "NodeNext",
         "moduleResolution": "nodenext",
         "outDir": "../dist",
         "rootDir": ".",
@@ -15,7 +15,7 @@
         "composite": true
     },
     "include": [
-        "**/*.ts"
+        "*.ts"
     ],
     "exclude": [
         "node_modules"

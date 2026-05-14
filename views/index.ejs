@@ -53,9 +53,10 @@
 <body>
     <div id="endpoint_choice">
         <label for="endpoint_select">Select SPARQL Endpoint:</label>
-        <select id="endpoint_select">
+        <input id="endpoint_select_input" list="endpoint_select">
+        <datalist id="endpoint_select">
             <option value="Loading..." disabled selected id="endpoint_loading">Loading...</option>
-        </select>
+        </datalist>
     </div>
     <div id="suggestion_choice">
         <label for="suggestion_select">Select Suggestion Engine:</label>

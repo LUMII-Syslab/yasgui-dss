@@ -224,6 +224,7 @@ export function extractTriplePatternsFromQuery(query: string, position: Position
         if (index !== -1) {
             completePatterns.splice(index, 1);
         }
+
     }
 
     return [completePatterns, patternWithCurrentlyEditedToken];

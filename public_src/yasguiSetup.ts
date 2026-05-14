@@ -56,8 +56,9 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
 
     const propertyCompleter: CompleterConfig = {
         name: "dasa_properties",
-        autoShow: true,
+        autoShow: false,
         get: async (y, t) => {
+            console.log("Autocompleting")
             return getCompleterSelect() == "dasa" ?
                 await getProperties(dssClient, yasqeClass, selectedEndpointData)(y, t) :
                 await defaultPropertyCompleter?.get(y, t)
@@ -68,8 +69,9 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
                 return defaultPropertyCompleter.isValidCompletionPosition(_yasqe);
             }
             const yasqe = _yasqe as CodeMirror.Editor & YASQE;
-
-            return yasqeClass.Autocompleters["property"]?.isValidCompletionPosition(yasqe) ?? false;
+            const isValid = yasqeClass.Autocompleters["property"]?.isValidCompletionPosition(yasqe);
+            console.log(`isValid: ${isValid}`);
+            return isValid;
         },
         preProcessToken(yasqe, token) {
             if (getCompleterSelect() == "builtin") {
@@ -105,7 +107,7 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
 
     const classCompleter: CompleterConfig = {
         name: "dasa_classes",
-        autoShow: true,
+        autoShow: false,
         get: async (y, t) => {
             return getCompleterSelect() == "dasa" ?
                 await getClasses(dssClient, yasqeClass, selectedEndpointData)(y, t) :
@@ -150,12 +152,12 @@ console.log("YASQE setup module loaded");
 function verifyEndpointData(endpointData: unknown): endpointData is EndpointData {
     return typeof endpointData === "object" &&
         endpointData !== null &&
-        "display_name" in endpointData &&
-        "sparql_url" in endpointData &&
-        "db_schema_name" in endpointData &&
-        typeof endpointData.display_name === "string" &&
-        typeof endpointData.sparql_url === "string" &&
-        typeof endpointData.db_schema_name === "string";
+        "displayName" in endpointData &&
+        "sparqlUrl" in endpointData &&
+        "dbSchemaName" in endpointData &&
+        typeof endpointData.displayName === "string" &&
+        typeof endpointData.sparqlUrl === "string" &&
+        typeof endpointData.dbSchemaName === "string";
 }
 
 function selectEndpoint(endpointData: EndpointData, yasgui: YASGUI) {
@@ -173,27 +175,31 @@ function selectEndpoint(endpointData: EndpointData, yasgui: YASGUI) {
 
 
 function setupEndpointSelector(endpoints: EndpointData[], yasgui: YASGUI) {
-    const endpointSelect = document.getElementById("endpoint_select") as HTMLSelectElement;
+    const endpointSelect = document.getElementById("endpoint_select") as HTMLDataListElement;
+    const endpointSelectInput = document.getElementById("endpoint_select_input") as HTMLInputElement;
     // Clear loading option
     endpointSelect.innerHTML = "";
     endpoints.forEach(endpoint => {
         const option = document.createElement("option");
-        option.value = endpoint.sparqlUrl;
+        option.value = JSON.stringify(endpoint);
         option.text = `${endpoint.displayName} (${endpoint.sparqlUrl})`;
         option.dataset["endpoint"] = JSON.stringify(endpoint);
         endpointSelect.appendChild(option);
     });
 
-    endpointSelect.addEventListener("change", () => {
-        const selectedEndpoint =
-            endpointSelect.options[endpointSelect.selectedIndex];
-        const endpointData = JSON.parse(selectedEndpoint?.dataset["endpoint"] ?? "null");
-        if (!verifyEndpointData(endpointData)) {
-            console.error("Selected endpoint data is invalid:", endpointData);
-            return;
-        }
+    endpointSelectInput.addEventListener("change", () => {
+        try {
+            const endpointData: EndpointData = JSON.parse(endpointSelectInput.value);
+            endpointSelectInput.value = endpointData.displayName;
+            if (!verifyEndpointData(endpointData)) {
+                console.error("Selected endpoint data is invalid:", endpointData);
+                return;
+            }
 
-        selectEndpoint(endpointData, yasgui);
+            selectEndpoint(endpointData, yasgui);
+        } catch (e) {
+            console.warn(e);
+        }
     });
 
     const initialEndpoint = endpoints[0];

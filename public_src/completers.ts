@@ -2,7 +2,7 @@
 import yasgui from "@triply/yasgui"
 import yasqe, { Hint, Token } from "@triply/yasqe";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
-import { DSSAutocompletionClient, DSSClient, intersectSuggestions, NamespaceData, PropertyData, TripletStore } from "dss-client";
+import { DSSAutocompletionClient, DSSClient, intersectSuggestions, NamespaceData, PropertyData, QueryBuilder, TripletStore } from "dss-client";
 import { extractTriplePatternsFromQuery } from "./queryLexer.js";
 import { Completion, Editor } from "codemirror";
 import { suggestionComparator } from "./suggestionComparator.js";
@@ -168,8 +168,13 @@ function preprocessIri(yasqe: Yasqe, iri: string) {
         console.warn(`Could not preprocess IRI ${iri} to full URI form. Returning as is.`);
         return iri;
     } else {
-        // <IRI> form
-        return iri.substring(1, iri.length - 1);
+        if (iri.trim().endsWith(">")) {
+            // <IRI> form
+            return iri.substring(1, iri.length - 1);
+        } else {
+            // Incomplete <IRI form
+            return iri.substring(1);
+        }
     }
 }
 /* ----- End of copied functions ----- */
@@ -196,7 +201,6 @@ export const getProperties: ((dssClient: DSSClient, yasqeClass: YASQE, endpointD
 
     const processedTriples = triplePatterns[0].map(tp => preprocessTriplePattern(yasqe, tp));
     const currentTriple = triplePatterns[1] ? preprocessTriplePattern(yasqe, triplePatterns[1]) : null;
-
     const activeItem = endpointData;
     if (!activeItem) {
         console.error("No active endpoint selected for autocompletion.");
@@ -206,8 +210,8 @@ export const getProperties: ((dssClient: DSSClient, yasqeClass: YASQE, endpointD
 
     const autocompletionClient = constructClient(dssClient, processedTriples, activeItem?.dbSchemaName);
 
-    const outgoingSuggestions = await autocompletionClient.suggestOutgoingProperties(currentTriple?.subject ?? "", autocompleterAbortController.signal);
-    const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "", autocompleterAbortController.signal);
+    const outgoingSuggestions = await autocompletionClient.suggestOutgoingProperties(currentTriple?.subject ?? "", autocompleterAbortController.signal, true);
+    const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "", autocompleterAbortController.signal, new QueryBuilder(), true);
     let suggestions = [...intersectSuggestions(outgoingSuggestions, incomingSuggestions)];
     if (suggestions.length === 0) {
         if (outgoingSuggestions.length === 0) {

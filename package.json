@@ -7,23 +7,28 @@
   "dependencies": {
     "@triply/yasgui": "^4.2.28",
     "@types/codemirror": "^5",
+    "chart.js": "^4.5.1",
     "dotenv": "^17.3.1",
     "dss-client": "github:LUMII-Syslab/dss-client#semver:~0.6.0",
     "ejs": "^4.0.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "puppeteer": "^24.41.0",
+    "skia-canvas": "^3.0.8"
   },
   "scripts": {
     "build": "npm run build:server && npm run build:client",
     "build:server": "tsc --project src",
     "build:client": "esbuild public_src/yasguiSetup.ts --bundle --outfile=public/scripts/yasguiSetup.js --sourcemap --format=esm",
     "start": "npm run build && node dist/index.js",
-    "start:watch": "npx concurrently \"tsc --project src --watch\" \"esbuild public_src/yasguiSetup.ts --bundle --outfile=public/scripts/yasguiSetup.js --sourcemap --watch\" \"nodemon --watch dist dist/index.js\""
+    "start:watch": "npx concurrently \"tsc --project src --watch\" \"esbuild public_src/yasguiSetup.ts --bundle --outfile=public/scripts/yasguiSetup.js --sourcemap --watch\" \"nodemon --watch dist dist/index.js\"",
+    "test:puppeteer": "node dist/puppeteer_data_gatherer.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.3.0",
+    "@types/puppeteer": "^7.0.4",
     "concurrently": "^9.0.0",
     "esbuild": "^0.27.3",
     "eslint": "^10.0.3",
