@@ -172,10 +172,10 @@
     debug "^4.3.1"
     minimatch "^10.2.4"
 
-"@eslint/config-helpers@^0.5.5":
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/@eslint/config-helpers/-/config-helpers-0.5.5.tgz#ae16134e4792ac5fbdc533548a24ac1ea9f7f3ae"
-  integrity sha512-eIJYKTCECbP/nsKaaruF6LW967mtbQbsw4JTtSVkUQc9MneSkbrgPJAbKl9nWr0ZeowV8BfsarBmPpBzGelA2w==
+"@eslint/config-helpers@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@eslint/config-helpers/-/config-helpers-0.6.0.tgz#ef9a36881d39dfd5dbeac22b0da997fabfb08b03"
+  integrity sha512-ii6Bw9jJ2zi2cWA2Z+9/QZ/+3DX6kwaV5Q986D/CdP3Lap3w/pgQZ373FV7byY/i7L4IRH/G43I5dz1ClsCbpA==
   dependencies:
     "@eslint/core" "^1.2.1"
 
@@ -306,6 +306,17 @@
     extract-zip "^2.0.1"
     progress "^2.0.3"
     proxy-agent "^6.5.0"
+    semver "^7.7.4"
+    tar-fs "^3.1.1"
+    yargs "^17.7.2"
+
+"@puppeteer/browsers@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-3.0.2.tgz#724c17909e48afd30a1e1aea4ee2acebd85c90df"
+  integrity sha512-JnOSHrAdCQOj27P5QnTrd6bkYd9cXXeFMJS5UJF3UmQbpZQAMMO7AaL0NyrT7i2l/43bwjaHguU+LOpBRyx66w==
+  dependencies:
+    debug "^4.4.3"
+    progress "^2.0.3"
     semver "^7.7.4"
     tar-fs "^3.1.1"
     yargs "^17.7.2"
@@ -486,11 +497,11 @@
   integrity sha512-gIW7lQLZbue7lRSWEFql49QJJWThrTFFeIMJdp3eH4tKoxm1OvEPg02rm4wCCSHS0cL3/Fizimb35b7k8atwsQ==
 
 "@types/node@*", "@types/node@^25.3.0":
-  version "25.7.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.7.0.tgz#7498f82e90dbdce7c34b75aaaa256c498a0ebe6c"
-  integrity sha512-z+pdZyxE+RTQE9AcboAZCb4otwcrvgHD+GlBpPgn0emDVt0ohrTMhAwlr2Wd9nZ+nihhYFxO2pThz3C5qSu2Eg==
+  version "25.8.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.8.0.tgz#d13033397d1c186876bed4c9b9d7f3f962097eb3"
+  integrity sha512-TCFSk8IZh+iLX1xtksoBVtdmgL+1IX0fC9BeU4QqFSuNdN/K+HUlhqOzEmSYYpZUVsLYcPqc9KX+60iDuninSQ==
   dependencies:
-    undici-types "~7.21.0"
+    undici-types ">=7.24.0 <7.24.7"
 
 "@types/node@14.0.23":
   version "14.0.23"
@@ -950,6 +961,14 @@ chromium-bidi@14.0.0:
     mitt "^3.0.1"
     zod "^3.24.1"
 
+chromium-bidi@16.0.1:
+  version "16.0.1"
+  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-16.0.1.tgz#0c6b0e55065468fc777d62032b63b73f614b1d88"
+  integrity sha512-J63PGu/9PpeCwLIcKYyzWP6yaVL5pxuBc0shlYCYM8BaAkmlwiQboXO1iNbOgSDbVklEyYFfNEcHD8oOAWacUA==
+  dependencies:
+    mitt "^3.0.1"
+    zod "^3.24.1"
+
 ci-info@^4.2.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-4.4.0.tgz#7d54eff9f54b45b62401c26032696eb59c8bd18c"
@@ -1152,9 +1171,9 @@ dotenv@^17.3.1:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-17.4.2.tgz#c07e54a746e11eba021dd9e1047ced5afdc1c034"
   integrity sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==
 
-"dss-client@github:LUMII-Syslab/dss-client#semver:~0.6.0":
-  version "0.6.7"
-  resolved "git+ssh://git@github.com/LUMII-Syslab/dss-client.git#dea2ceff65f9f377f43ce4e556d5b82abf0afb9b"
+"dss-client@github:LUMII-Syslab/dss-client#semver:~0.6.8-0":
+  version "0.6.8-1"
+  resolved "git+ssh://git@github.com/LUMII-Syslab/dss-client.git#887cc6f69fa482a6fcc5ca2d527c93855611a60b"
 
 dunder-proto@^1.0.1:
   version "1.0.1"
@@ -1322,14 +1341,14 @@ eslint-visitor-keys@^5.0.0, eslint-visitor-keys@^5.0.1:
   integrity sha512-tD40eHxA35h0PEIZNeIjkHoDR4YjjJp34biM0mDvplBe//mB+IHCqHDGV7pxF+7MklTvighcCPPZC7ynWyjdTA==
 
 eslint@^10.0.3:
-  version "10.3.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-10.3.0.tgz#ed5b810eb8e0191bf24bddcf9cdb45b974e0a16d"
-  integrity sha512-XbEXaRva5cF0ZQB8w6MluHA0kZZfV2DuCMJ3ozyEOHLwDpZX2Lmm/7Pp0xdJmI0GL1W05VH5VwIFHEm1Vcw2gw==
+  version "10.4.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-10.4.0.tgz#d86b6c405de0f19f3318c47139b8cb6771b3f592"
+  integrity sha512-loXy6bWOoP3EP6JA7jo6p5jMpBJmHmsNZM5SFRHLdh1MGOPurMnNBj4ZlAbaqUAaQWbCr7jHV4P7gzAyryZWkQ==
   dependencies:
     "@eslint-community/eslint-utils" "^4.8.0"
     "@eslint-community/regexpp" "^4.12.2"
     "@eslint/config-array" "^0.23.5"
-    "@eslint/config-helpers" "^0.5.5"
+    "@eslint/config-helpers" "^0.6.0"
     "@eslint/core" "^1.2.1"
     "@eslint/plugin-kit" "^0.7.1"
     "@humanfs/node" "^0.16.6"
@@ -2353,7 +2372,32 @@ puppeteer-core@24.43.1:
     webdriver-bidi-protocol "0.4.1"
     ws "^8.20.0"
 
-puppeteer@*, puppeteer@^24.41.0:
+puppeteer-core@25.0.2:
+  version "25.0.2"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-25.0.2.tgz#782b7904a635f00ba8cec057c6f745a8b04ab11f"
+  integrity sha512-Q0IUIHER1S9PiNIfdNFc+pVOj79Tp4b9v0Fv4enigwsLy0Hbgq45KFgqzmN31DeCXh+Uvxnt9r7fMERhAMjs8Q==
+  dependencies:
+    "@puppeteer/browsers" "3.0.2"
+    chromium-bidi "16.0.1"
+    debug "^4.4.3"
+    devtools-protocol "0.0.1608973"
+    typed-query-selector "^2.12.2"
+    webdriver-bidi-protocol "0.4.1"
+    ws "^8.20.0"
+
+puppeteer@*:
+  version "25.0.2"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-25.0.2.tgz#d4901c58b859e8fa8f069fd5d46775293583addc"
+  integrity sha512-cXj/5RlDCzSC7k1YdBIm6prb8lK8lEdmScVbcalX1rBn4fqNN1UNuEz/HZZYiDLsK8dOGvyLpGjh6CgxCyqKtg==
+  dependencies:
+    "@puppeteer/browsers" "3.0.2"
+    chromium-bidi "16.0.1"
+    cosmiconfig "^9.0.0"
+    devtools-protocol "0.0.1608973"
+    puppeteer-core "25.0.2"
+    typed-query-selector "^2.12.2"
+
+puppeteer@^24.41.0:
   version "24.43.1"
   resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.43.1.tgz#86cad9170ce2dec2db3b8d1d34c0c91424bbe3e3"
   integrity sha512-/FSOViCrqRdb1HDocpsM9Z1giA71gTQPUt3SpHGVRALKAy/rJr1fLFYZW9F23qPxqVxTHQnbh/5B5opJST3kAw==
@@ -2366,9 +2410,9 @@ puppeteer@*, puppeteer@^24.41.0:
     typed-query-selector "^2.12.2"
 
 qs@^6.14.0, qs@^6.14.1, qs@^6.9.4:
-  version "6.15.1"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.15.1.tgz#bdb55aed06bfac257a90c44a446a73fba5575c8f"
-  integrity sha512-6YHEFRL9mfgcAvql/XhwTvf5jKcOiiupt2FiJxHkiX1z4j7WL8J/jRHYLluORvc1XxB5rV20KoeK00gVJamspg==
+  version "6.15.2"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.15.2.tgz#fd55426d710403ddccc45e0f9eab16db7727ece9"
+  integrity sha512-Rzq0KEyX/w/tEybncDgdkZrJgVUsUMk3xjh3t5bv3S1HTAtg+uOYt72+ZfwiQwKdysThkTBdL/rTi6HDmX9Ddw==
   dependencies:
     side-channel "^1.1.0"
 
@@ -2857,10 +2901,10 @@ undefsafe@^2.0.5:
   resolved "https://registry.yarnpkg.com/undefsafe/-/undefsafe-2.0.5.tgz#38733b9327bdcd226db889fb723a6efd162e6e2c"
   integrity sha512-WxONCrssBM8TSPRqN5EmsjVrsv4A8X12J4ArBiiayv3DyyG3ZlIg6yysuuSYdZsVz3TKcTg2fd//Ujd4CHV1iA==
 
-undici-types@~7.21.0:
-  version "7.21.0"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.21.0.tgz#433f7dd1b5daa9ab4dacb721a5e11a8de51eadda"
-  integrity sha512-w9IMgQrz4O0YN1LtB7K5P63vhlIOvC7opSmouCJ+ZywlPAlO9gIkJ+otk6LvGpAs2wg4econaCz3TvQ9xPoyuQ==
+"undici-types@>=7.24.0 <7.24.7":
+  version "7.24.6"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.24.6.tgz#61275b485d7fd4e9d269c7cf04ec2873c9cc0f91"
+  integrity sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==
 
 unpipe@~1.0.0:
   version "1.0.0"

@@ -209,9 +209,10 @@ export const getProperties: ((dssClient: DSSClient, yasqeClass: YASQE, endpointD
     console.log(`Current endpoint: ${activeItem?.displayName}`);
 
     const autocompletionClient = constructClient(dssClient, processedTriples, activeItem?.dbSchemaName);
-
+    const incomingBuilder = new QueryBuilder();
+    incomingBuilder.usePPRels = true;
     const outgoingSuggestions = await autocompletionClient.suggestOutgoingProperties(currentTriple?.subject ?? "", autocompleterAbortController.signal, true);
-    const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "", autocompleterAbortController.signal, new QueryBuilder(), true);
+    const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "", autocompleterAbortController.signal, incomingBuilder, true);
     let suggestions = [...intersectSuggestions(outgoingSuggestions, incomingSuggestions)];
     if (suggestions.length === 0) {
         if (outgoingSuggestions.length === 0) {
@@ -246,6 +247,7 @@ export const getProperties: ((dssClient: DSSClient, yasqeClass: YASQE, endpointD
     }
 
     const suggestionValues = suggestions.map(s => s.value);
+    console.log(`Found ${suggestionValues.length} property suggestions: ${suggestionValues}`);
     return suggestionValues;
 }
 
@@ -406,5 +408,6 @@ export const getClasses: ((dssClient: DSSClient, yasqeClass: YASQE, endpointData
         const genericSuggestions = await yasqeClass.Autocompleters["class"]?.get(yasqe, token);
         return genericSuggestions || [];
     }
+    console.log(`Found ${suggestions.length} class suggestions: ${suggestions.map(s => s.value)}`);
     return suggestions.map(s => s.value);
 };

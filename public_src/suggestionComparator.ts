@@ -42,12 +42,13 @@ export function suggestionComparator(yasqe: Yasqe, token: AutocompletionToken, n
     return (a: { value: string, count: number }, b: { value: string, count: number }) => {
         // prioritize suggestions where token is a subsequence of the suggestion
         const tokenString = (token.autocompletionString || "").toLocaleLowerCase();
+        const shortFormTokenString = (tryIriToShortForm(yasqe, tokenString) || tokenString).toLocaleLowerCase();
         const aShortForm = (tryIriToShortForm(yasqe, a.value) || a.value).toLocaleLowerCase();
         const bShortForm = (tryIriToShortForm(yasqe, b.value) || b.value).toLocaleLowerCase();
         const aLower = a.value.toLocaleLowerCase();
         const bLower = b.value.toLocaleLowerCase();
-        const aIsSubsequence = isSubsequence(tokenString, aShortForm);
-        const bIsSubsequence = isSubsequence(tokenString, bShortForm);
+        const aIsSubsequence = isSubsequence(shortFormTokenString, aShortForm);
+        const bIsSubsequence = isSubsequence(shortFormTokenString, bShortForm);
         if (aIsSubsequence && !bIsSubsequence) return -1;
         if (!aIsSubsequence && bIsSubsequence) return 1;
         // Then prioritize namespaces where basic order sequence is lower (higher relevance)
