@@ -5,7 +5,7 @@
 import { Hint, HintList, type Yasqe as YASQE } from "@triply/yasqe";
 import yasguiModule, { Yasgui as YASGUI } from "@triply/yasgui";
 const Yasgui = yasguiModule as unknown as typeof YASGUI;
-import { DSSClient, getEndpoints } from "dss-client";
+import { DSSClient, DefaultDSSRequestProvider } from "dss-client";
 
 import { CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
 
@@ -36,9 +36,9 @@ export let yasguiInstance: YASGUI | null = null;
 
 
 
+const requestProvider = new DefaultDSSRequestProvider(dssUrl);
 
-
-const dssClient = new DSSClient(dssUrl);
+const dssClient = new DSSClient(requestProvider);
 
 
 function getCompleterSelect() {
@@ -71,7 +71,7 @@ export function setupYasqe(yasqeClass: typeof YASQE) {
             const yasqe = _yasqe as CodeMirror.Editor & YASQE;
             const isValid = yasqeClass.Autocompleters["property"]?.isValidCompletionPosition(yasqe);
             console.log(`isValid: ${isValid}`);
-            return isValid;
+            return isValid ?? false;
         },
         preProcessToken(yasqe, token) {
             if (getCompleterSelect() == "builtin") {
@@ -152,10 +152,10 @@ console.log("YASQE setup module loaded");
 function verifyEndpointData(endpointData: unknown): endpointData is EndpointData {
     return typeof endpointData === "object" &&
         endpointData !== null &&
-        "displayName" in endpointData &&
+        "name" in endpointData &&
         "sparqlUrl" in endpointData &&
         "dbSchemaName" in endpointData &&
-        typeof endpointData.displayName === "string" &&
+        typeof endpointData.name === "string" &&
         typeof endpointData.sparqlUrl === "string" &&
         typeof endpointData.dbSchemaName === "string";
 }
@@ -181,21 +181,20 @@ function setupEndpointSelector(endpoints: EndpointData[], yasgui: YASGUI) {
     endpointSelect.innerHTML = "";
     endpoints.forEach(endpoint => {
         const option = document.createElement("option");
-        option.value = JSON.stringify(endpoint);
-        option.text = `${endpoint.displayName} (${endpoint.sparqlUrl})`;
+        option.value = endpoint.name;
+        option.text = `${endpoint.sparqlUrl}`;
         option.dataset["endpoint"] = JSON.stringify(endpoint);
         endpointSelect.appendChild(option);
     });
 
     endpointSelectInput.addEventListener("change", () => {
         try {
-            const endpointData: EndpointData = JSON.parse(endpointSelectInput.value);
-            endpointSelectInput.value = endpointData.displayName;
+            const endpointName = endpointSelectInput.value;
+            const endpointData = endpoints.find(e => e.name === endpointName);
             if (!verifyEndpointData(endpointData)) {
                 console.error("Selected endpoint data is invalid:", endpointData);
                 return;
             }
-
             selectEndpoint(endpointData, yasgui);
         } catch (e) {
             console.warn(e);
@@ -214,15 +213,9 @@ function setupEndpointSelector(endpoints: EndpointData[], yasgui: YASGUI) {
 
 function initYasgui() {
     setupYasqe(Yasgui.Yasqe);
-    const abortController = new AbortController();
 
     const yasgui = (async () => {
-        const endpointsData = await getEndpoints(dssUrl, abortController.signal);
-        const endpoints: EndpointData[] = endpointsData.map(endpoint => ({
-            dbSchemaName: endpoint.db_schema_name,
-            displayName: endpoint.display_name,
-            sparqlUrl: endpoint.sparql_url,
-        }));
+        const endpoints = await requestProvider.getOntologyList();
         console.log("Fetched endpoints:", endpoints);
 
         const yasgui: YASGUI = new Yasgui(
@@ -235,7 +228,7 @@ function initYasgui() {
                 keys: [],
                 renderItem: (data, source) => {
                     const endpointData = data.value as { endpoint: string, internal: EndpointData };
-                    source.innerHTML = endpointData.internal.displayName;
+                    source.innerHTML = endpointData.internal.name;
                 },
             },
         });

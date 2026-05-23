@@ -2,7 +2,7 @@
 import yasgui from "@triply/yasgui"
 import yasqe, { Hint, Token } from "@triply/yasqe";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
-import { DSSAutocompletionClient, DSSClient, intersectSuggestions, NamespaceData, PropertyData, QueryBuilder, TripletStore } from "dss-client";
+import { DefaultDSSRequestProvider, DSSAutocompletionClient, DSSClient, intersectSuggestions, NamespaceData, PropertyData, QueryBuilder, TripletStore } from "dss-client";
 import { extractTriplePatternsFromQuery } from "./queryLexer.js";
 import { Completion, Editor } from "codemirror";
 import { suggestionComparator } from "./suggestionComparator.js";
@@ -11,7 +11,7 @@ type YASQE = typeof yasgui.Yasgui.Yasqe | typeof yasqe.Yasqe;
 type Yasqe = InstanceType<YASQE>;
 type Triple = { subject: string, predicate: string, object: string };
 
-export type EndpointData = { displayName: string, sparqlUrl: string, dbSchemaName: string };
+export type EndpointData = { name: string, sparqlUrl: string, dbSchemaName: string };
 /// Abort controller for ongoing autocompletion requests,
 /// so that all requests can be cancelled when the autocompleter
 /// is retriggered before the previous request(s) have completed.
@@ -30,10 +30,10 @@ let autocompletionData: AutocompletionData = {
 };
 
 
-function constructClient(dssClient: DSSClient, queryContext: Triple[], ontologies: string) {
+function constructClient(dssClient: DSSClient, queryContext: Triple[], dbSchemaName: string) {
+    (dssClient.requestProvider as DefaultDSSRequestProvider).ontology = dbSchemaName;
     const tripleStore = new TripletStore();
     tripleStore.triplets = queryContext;
-    dssClient.ontology = ontologies;
     const client = new DSSAutocompletionClient(tripleStore, dssClient);
     client.perRequestLimit = 600;
     return client;
@@ -206,9 +206,9 @@ export const getProperties: ((dssClient: DSSClient, yasqeClass: YASQE, endpointD
         console.error("No active endpoint selected for autocompletion.");
         return [];
     }
-    console.log(`Current endpoint: ${activeItem?.displayName}`);
+    console.log(`Current endpoint: ${activeItem?.name}`);
 
-    const autocompletionClient = constructClient(dssClient, processedTriples, activeItem?.dbSchemaName);
+    const autocompletionClient = constructClient(dssClient, processedTriples, activeItem.dbSchemaName);
     const incomingBuilder = new QueryBuilder();
     incomingBuilder.usePPRels = true;
     const outgoingSuggestions = await autocompletionClient.suggestOutgoingProperties(currentTriple?.subject ?? "", autocompleterAbortController.signal, true);
