@@ -2,7 +2,7 @@
 import yasgui from "@triply/yasgui"
 import yasqe, { Hint, Token } from "@triply/yasqe";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
-import { DefaultDSSRequestProvider, DSSAutocompletionClient, DSSClient, intersectSuggestions, NamespaceData, PropertyData, QueryBuilder, TripletStore } from "dss-client";
+import { DefaultDSSRequestProvider, DSSAutocompletionClient, DSSClient, NamespaceData, PropertyData, QueryBuilder, TripletStore } from "dss-client";
 import { extractTriplePatternsFromQuery } from "./queryLexer.js";
 import { Completion, Editor } from "codemirror";
 import { suggestionComparator } from "./suggestionComparator.js";
@@ -211,19 +211,7 @@ export const getProperties: ((dssClient: DSSClient, yasqeClass: YASQE, endpointD
     const autocompletionClient = constructClient(dssClient, processedTriples, activeItem.dbSchemaName);
     const incomingBuilder = new QueryBuilder();
     incomingBuilder.usePPRels = true;
-    const outgoingSuggestions = await autocompletionClient.suggestOutgoingProperties(currentTriple?.subject ?? "", autocompleterAbortController.signal, true);
-    const incomingSuggestions = await autocompletionClient.suggestIncomingProperties(currentTriple?.object ?? "", autocompleterAbortController.signal, incomingBuilder, true);
-    let suggestions = [...intersectSuggestions(outgoingSuggestions, incomingSuggestions)];
-    if (suggestions.length === 0) {
-        if (outgoingSuggestions.length === 0) {
-            suggestions = incomingSuggestions;
-        } else if (incomingSuggestions.length === 0) {
-            suggestions = outgoingSuggestions;
-        } else {
-            suggestions = outgoingSuggestions.length < incomingSuggestions.length ? outgoingSuggestions : incomingSuggestions;
-        }
-    }
-
+    let suggestions = await autocompletionClient.suggestProperties(currentTriple?.subject ?? null, currentTriple?.object ?? null, null, null);
     const namespaceData = await autocompletionClient.dssClient.getNamespaces();
 
     if (token) {

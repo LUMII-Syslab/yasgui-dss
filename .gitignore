@@ -27,3 +27,16 @@ public/scripts
 .env
 
 dist
+
+# Yarn v2+ / v4
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Yarn state
+.pnp.*
+.yarn/install-state.gz

@@ -9,7 +9,7 @@
     "@types/codemirror": "^5",
     "chart.js": "^4.5.1",
     "dotenv": "^17.3.1",
-    "dss-client": "github:LUMII-Syslab/dss-client#semver:~0.8.0-0",
+    "dss-client": "https://github.com/LUMII-Syslab/dss-client.git#commit=e58acdf59eb28f246032a34693ff5495700e97c7",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
     "puppeteer": "^24.41.0",
@@ -36,5 +36,6 @@
     "nodemon": "^3.1.14",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1"
-  }
+  },
+  "packageManager": "yarn@4.15.0"
 }
