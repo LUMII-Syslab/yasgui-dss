@@ -9,7 +9,7 @@
     "@types/codemirror": "^5",
     "chart.js": "^4.5.1",
     "dotenv": "^17.3.1",
-    "dss-client": "https://github.com/LUMII-Syslab/dss-client.git#commit=e58acdf59eb28f246032a34693ff5495700e97c7",
+    "dss-client": "github:LUMII-Syslab/dss-client#main",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
     "puppeteer": "^24.41.0",
@@ -20,7 +20,7 @@
     "build:server": "tsc --project src",
     "build:client": "esbuild public_src/yasguiSetup.ts --bundle --outfile=public/scripts/yasguiSetup.js --sourcemap --format=esm",
     "start": "npm run build && node dist/index.js",
-    "start:watch": "npx concurrently \"tsc --project src --watch\" \"esbuild public_src/yasguiSetup.ts --bundle --outfile=public/scripts/yasguiSetup.js --sourcemap --watch\" \"nodemon --watch dist dist/index.js\"",
+    "start:watch": "npx concurrently \"tsc --project src --watch\" \"esbuild public_src/yasguiSetup.ts  --bundle --outfile=public/scripts/yasguiSetup.js --sourcemap --watch\" \"nodemon --watch dist dist/index.js\"",
     "test:puppeteer": "node dist/puppeteer_data_gatherer.js"
   },
   "devDependencies": {

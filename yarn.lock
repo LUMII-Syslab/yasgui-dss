@@ -1631,10 +1631,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dss-client@https://github.com/LUMII-Syslab/dss-client.git#commit=e58acdf59eb28f246032a34693ff5495700e97c7":
-  version: 0.8.7-2
-  resolution: "dss-client@https://github.com/LUMII-Syslab/dss-client.git#commit=e58acdf59eb28f246032a34693ff5495700e97c7"
-  checksum: 10c0/b0f1b2a94d2567e054231668d9e2118c687f013ab330f12aa785514689e8b9eece9496f2e57cdc30f74097a22d0e729cef07933f3c5eb9968df993513789baed
+"dss-client@github:LUMII-Syslab/dss-client#main":
+  version: 0.8.7
+  resolution: "dss-client@https://github.com/LUMII-Syslab/dss-client.git#commit=d8bfb68368ff9523d6c1eb723e2b8094c5287f7e"
+  checksum: 10c0/6d43828e55871eae8b352d061e924947ae43ddb093459054a764825333f4cb339b69d223a29aa7d1b8ee08258591f269f0713765465006999529c4566f93e73c
   languageName: node
   linkType: hard
 
@@ -4228,7 +4228,7 @@ __metadata:
     chart.js: "npm:^4.5.1"
     concurrently: "npm:^9.0.0"
     dotenv: "npm:^17.3.1"
-    dss-client: "https://github.com/LUMII-Syslab/dss-client.git#commit=e58acdf59eb28f246032a34693ff5495700e97c7"
+    dss-client: "github:LUMII-Syslab/dss-client#main"
     ejs: "npm:^4.0.1"
     esbuild: "npm:^0.27.3"
     eslint: "npm:^10.0.3"

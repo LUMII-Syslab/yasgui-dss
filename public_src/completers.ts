@@ -2,10 +2,18 @@
 import yasgui from "@triply/yasgui"
 import yasqe, { Hint, Token } from "@triply/yasqe";
 import { AutocompletionToken, CompleterConfig } from "@triply/yasqe/build/ts/src/autocompleters/index.js";
-import { DefaultDSSRequestProvider, DSSAutocompletionClient, DSSClient, NamespaceData, PropertyData, QueryBuilder, TripletStore } from "dss-client";
-import { extractTriplePatternsFromQuery } from "./queryLexer.js";
+import {
+    DefaultDSSRequestProvider,
+    DSSAutocompletionClient,
+    DSSClient,
+    NamespaceData,
+    PropertyData,
+    QueryBuilder,
+    TripletStore,
+    extractTriplePatternsFromQuery,
+    suggestionComparator
+} from "dss-client";
 import { Completion, Editor } from "codemirror";
-import { suggestionComparator } from "./suggestionComparator.js";
 
 type YASQE = typeof yasgui.Yasgui.Yasqe | typeof yasqe.Yasqe;
 type Yasqe = InstanceType<YASQE>;
@@ -215,7 +223,7 @@ export const getProperties: ((dssClient: DSSClient, yasqeClass: YASQE, endpointD
     const namespaceData = await autocompletionClient.dssClient.getNamespaces();
 
     if (token) {
-        suggestions = suggestions.sort(suggestionComparator(yasqe, token, namespaceData));
+        suggestions = suggestions.sort(suggestionComparator(yasqe.getPrefixesFromQuery(), token.autocompletionString ?? "", namespaceData));
     }
 
     if (suggestions.length === 0) {
@@ -387,7 +395,7 @@ export const getClasses: ((dssClient: DSSClient, yasqeClass: YASQE, endpointData
     const namespaceData = await autocompletionClient.dssClient.getNamespaces();
 
     if (token) {
-        suggestions = suggestions.sort(suggestionComparator(yasqe, token, namespaceData));
+        suggestions = suggestions.sort(suggestionComparator(yasqe.getPrefixesFromQuery(), token.autocompletionString ?? "", namespaceData));
     }
 
     if (suggestions.length === 0) {
