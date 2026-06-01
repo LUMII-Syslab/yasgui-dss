@@ -56,7 +56,6 @@ app.post('/proxy', async (req, res) => {
           'Accept': acceptHeader
         }
       };
-      console.log('Proxying GET request to:', url, 'with options:', requestOptions);
       const response = await fetch(url, requestOptions);
       if (!response.ok) {
         res.status(response.status).json({ error: `Endpoint returned ${response.status}` });
@@ -85,7 +84,6 @@ app.post('/proxy', async (req, res) => {
         },
         body: targetQuery
       };
-      console.log('Proxying POST request to:', url, 'with options:', requestOptions);
       const response = await fetch(url, requestOptions);
       if (!response.ok) {
         res.status(response.status).json({ error: `Endpoint returned ${response.status}` });
