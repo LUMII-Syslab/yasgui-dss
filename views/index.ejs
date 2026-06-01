@@ -6,6 +6,7 @@
     <title>DASA Display</title>
     <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
         .yasgui .autocompleteWrapper {
             display: none !important;
         }
@@ -47,36 +48,144 @@
             color: rgb(196, 196, 196);
         }
 
+        #main {
+            margin-left: 5vw;
+            margin-right: 5vw;
+        }
+
+        #header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #dfdfdf;
+            
+            font-family: "Montserrat", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        #links {
+            text-align: right;
+            display: flex;
+            
+        }
+
+        #links>div {
+            margin-right: 10px;
+        }
+
+        #links a {
+            text-decoration: none;
+            color: black;
+        }
+
+        #links a div {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #links a div:hover {
+            background-color: #b6b6b6;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Montserrat", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        #configuration>div{
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+        
+        #configuration input {
+            font-size: 1.5rem;
+            padding: 0.25rem;
+        }
+
+        #configuration select {
+            font-size: 1.5rem;
+            padding: 0.25rem;
+        }
+
+        #configuration #endpoint_url {
+            font-family: "Roboto Mono", monospace;
+            font-weight: 400;
+            font-style: normal;
+
+        }
+
+        .yasgui .tabContextButton .svgImg {
+            width: 1.5em;
+            height: 1.5em;
+        }
+        .yasgui .tabContextButton svg {
+            max-width: 1.5em;
+            max-height: 1.5em;
+        }
     </style>
 </head>
 
 <body>
-    <div id="endpoint_choice">
-        <label for="endpoint_select">Select DSS Schema</label>
-        <input id="endpoint_select_input" list="endpoint_select">
-        <datalist id="endpoint_select">
-            <option value="Loading..." disabled selected id="endpoint_loading">Loading...</option>
-        </datalist>
+    <div id="header">
+        <div>
+            <h1>DSS Assisted SPARQL Autocompletion</h1>
+        </div>
+        <div id="links">
+            <div>
+                <a href="https://github.com/LUMII-Syslab/yasgui-dss" target="_blank">
+                    <div>
+                        <span>Project Repository</span>
+                        <img src="/github-logo.svg" alt="GitHub Logo" style="height: 2em; margin: 0.5em; vertical-align: middle;">
+                    </div>
+                </a>
+            </div>
+            <div>
+                <a href="https://github.com/LUMII-Syslab/dss-client" target="_blank">
+                    <div>
+                        <span>DSS Client Repository</span>
+                        <img src="/github-logo.svg" alt="GitHub Logo" style="height: 2em; margin: 0.5em; vertical-align: middle;">
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
-    <div>
-        <span>SPARQL Endpoint:</span>
-        <span id="endpoint_url">Loading...</span>
+    <div id="main">
+        <div id="configuration">
+            <div id="endpoint_choice">
+                <label for="endpoint_select">Select DSS Schema</label>
+                <input id="endpoint_select_input" list="endpoint_select">
+                <datalist id="endpoint_select">
+                    <option value="Loading..." disabled selected id="endpoint_loading">Loading...</option>
+                </datalist>
+            </div>
+            <div id="endpoint_url_display">
+                <span>SPARQL Endpoint:</span>
+                <span id="endpoint_url">Loading...</span>
+            </div>
+            <div id="suggestion_choice">
+                <label for="suggestion_select">Select Suggestion Engine:</label>
+                <select id="suggestion_select">
+                    <option value="dasa" selected>DSS Assisted SPARQL Autocompletion</option>
+                    <option value="builtin">YASQE built-in</option>
+                </select>
+            </div>
+        </div>
+        <div id="yasgui"></div>
+        <script>
+            const dssUrl = '<%= dssUrl %>';
+
+        </script>
+        <script src="/scripts/yasguiSetup.js" type="module"></script>
+
     </div>
-    <div id="suggestion_choice">
-        <label for="suggestion_select">Select Suggestion Engine:</label>
-        <select id="suggestion_select">
-            <option value="dasa" selected>DSS Assisted SPARQL Autocompletion</option>
-            <option value="builtin">YASQE built-in</option>
-        </select>
-    </div>
-    <div id="yasgui"></div>
-    <script>
-        const dssUrl = '<%= dssUrl %>';
-
-    </script>
-    <script src="/scripts/yasguiSetup.js" type="module"></script>
-
-
 </body>
 
 </html>
