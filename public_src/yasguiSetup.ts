@@ -195,6 +195,7 @@ function setupEndpointSelector(endpoints: EndpointData[], yasgui: YASGUI) {
                 console.error("Selected endpoint data is invalid:", endpointData);
                 return;
             }
+            document.getElementById("endpoint_url")!.textContent = endpointData.sparqlUrl;
             selectEndpoint(endpointData, yasgui);
         } catch (e) {
             console.warn(e);
@@ -203,6 +204,8 @@ function setupEndpointSelector(endpoints: EndpointData[], yasgui: YASGUI) {
 
     const initialEndpoint = endpoints[0];
     if (initialEndpoint) {
+        document.getElementById("endpoint_url")!.textContent = initialEndpoint.sparqlUrl;
+        endpointSelectInput.value = initialEndpoint.name;
         selectEndpoint(initialEndpoint, yasgui);
     } else {
         console.warn("No endpoints available to select.");
@@ -231,6 +234,7 @@ function initYasgui() {
                     source.innerHTML = endpointData.internal.name;
                 },
             },
+            corsProxy: "/proxy"
         });
         setupEndpointSelector(endpoints, yasgui);
 

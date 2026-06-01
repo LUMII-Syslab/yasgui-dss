@@ -52,11 +52,15 @@
 
 <body>
     <div id="endpoint_choice">
-        <label for="endpoint_select">Select SPARQL Endpoint:</label>
+        <label for="endpoint_select">Select DSS Schema</label>
         <input id="endpoint_select_input" list="endpoint_select">
         <datalist id="endpoint_select">
             <option value="Loading..." disabled selected id="endpoint_loading">Loading...</option>
         </datalist>
+    </div>
+    <div>
+        <span>SPARQL Endpoint:</span>
+        <span id="endpoint_url">Loading...</span>
     </div>
     <div id="suggestion_choice">
         <label for="suggestion_select">Select Suggestion Engine:</label>
