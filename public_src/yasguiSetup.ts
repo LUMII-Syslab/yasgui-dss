@@ -189,7 +189,7 @@ function setupEndpointSelector(endpoints: EndpointData[], yasgui: YASGUI) {
 
     endpointSelectInput.addEventListener("change", () => {
         try {
-            const endpointName = endpointSelectInput.value;
+            const endpointName = endpointSelectInput.value.trim();
             const endpointData = endpoints.find(e => e.name === endpointName);
             if (!verifyEndpointData(endpointData)) {
                 console.error("Selected endpoint data is invalid:", endpointData);
